@@ -42,8 +42,7 @@ private:
     void _initTableWidget();
     void _initSystemTrayIcon();
     void _updateDateTimeList();
-    void _showInfoWidget();
-    QString _getInfoText(int index);
+    void _showInfoWidget(int index);
 
     void on_addOneRow();
     void on_save();
@@ -63,12 +62,23 @@ private:
         EveryMonth,
         EveryYear
     };
-    QMap<FrequencyType, QString> m_frequencyMap = {{FrequencyType::Once, "单次"},
-                                                   {FrequencyType::EveryDay, "每天"},
-                                                   {FrequencyType::EveryWeek, "每周"},
-                                                   {FrequencyType::EveryMonth, "每月"},
-                                                   {FrequencyType::EveryYear, "每年"}};
-    QMap<int, QList<QVariant>> m_tableDataMap;
+
+    const QMap<FrequencyType, QString> m_frequencyTypeMap = {{FrequencyType::Once, "单次"},
+                                                             {FrequencyType::EveryDay, "每天"},
+                                                             {FrequencyType::EveryWeek, "每周"},
+                                                             {FrequencyType::EveryMonth, "每月"},
+                                                             {FrequencyType::EveryYear, "每年"}};
+    struct oneTableRowItem
+    {
+        QCheckBox *checkBox = nullptr;
+        QComboBox *comBox = nullptr;
+        QDateTimeEdit *dateTimeEdit = nullptr;
+        QLineEdit *lineEdit = nullptr;
+    };
+    const QStringList m_tableHeaderLables = {QString(), "频率", "时间", "事件"};
+
+    QList<oneTableRowItem> m_tableItemWidgetList;
     QList<QPair<int, QDateTime>> m_dateTimeList;
 };
+
 #endif // MAINWINDOW_H

@@ -44,14 +44,13 @@ void MainWindow::_initTableWidget()
     {
         ui->tableWidget->removeRow(0);
     }
-    QStringList labels = {"", "频率", "时间", "事件"};
-    ui->tableWidget->setColumnCount(labels.size());
+    ui->tableWidget->setColumnCount(m_tableHeaderLables.size());
     ui->tableWidget->horizontalHeader()->setVisible(true);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-    ui->tableWidget->setHorizontalHeaderLabels(labels);
+    ui->tableWidget->setHorizontalHeaderLabels(m_tableHeaderLables);
 }
 
 void MainWindow::_initSystemTrayIcon()
@@ -91,24 +90,32 @@ void MainWindow::on_addOneRow()
 {
     int row = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(row);
+    oneTableRowItem tableItems;
+    for (int i = 0; i < ui->tableWidget->columnCount(); i++)
+    {
+        switch (i)
+        {
+        case 0:
+        {
+            QWidget *centeredWidget = new QWidget(ui->tableWidget);
+            tableItems.checkBox = new QCheckBox(centeredWidget);
+            QHBoxLayout *layout = new QHBoxLayout(centeredWidget);
+            layout->addWidget(tableItems.checkBox);
+            layout->setAlignment(Qt::AlignCenter);  // 居中
+            layout->setContentsMargins(0, 0, 0, 0); // 去除边距
+            tableItems.checkBox->setChecked(true);
+            ui->tableWidget->setCellWidget(row, i, centeredWidget);
+        }
+        break;
+        case 1:
+        {
+            tableItems.comBox = new QComboBox(ui->tableWidget);
+            tableItems.comBox->addItems(QStringList(m_frequencyTypeMap.values()));
+            ui->tableWidget->setCellWidget(row, i, tableItems.comBox);
 
-    QWidget *centeredWidget = new QWidget(ui->tableWidget);
-    QCheckBox *checkBox = new QCheckBox(centeredWidget);
-    QHBoxLayout *layout = new QHBoxLayout(centeredWidget);
-    layout->addWidget(checkBox);
-    layout->setAlignment(Qt::AlignCenter);  // 居中
-    layout->setContentsMargins(0, 0, 0, 0); // 去除边距
-    checkBox->setChecked(true);
-
-    QComboBox *comBox = new QComboBox(ui->tableWidget);
-    comBox->addItems(QStringList(m_frequencyMap.values()));
-
-    QDateTimeEdit *dateTimeEdit = new QDateTimeEdit(ui->tableWidget);
-
-    QLineEdit *lineEdit = new QLineEdit(ui->tableWidget);
-
-    connect(comBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, dateTimeEdit](int index)
-            {
+            connect(tableItems.comBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, row](int index)
+                    {
+                auto dateTimeEdit=this->m_tableItemWidgetList[row].dateTimeEdit;
                 FrequencyType _type = static_cast<FrequencyType>(index);
                 switch (_type)
                 {
@@ -137,13 +144,26 @@ void MainWindow::on_addOneRow()
                 currentTime.setHMS(currentTime.hour(), currentTime.minute(), 0);
                 currentDateTime.setTime(currentTime);
                 dateTimeEdit->setDateTime(currentDateTime); });
-
-    comBox->currentIndexChanged(comBox->currentIndex());
-
-    ui->tableWidget->setCellWidget(row, 0, centeredWidget);
-    ui->tableWidget->setCellWidget(row, 1, comBox);
-    ui->tableWidget->setCellWidget(row, 2, dateTimeEdit);
-    ui->tableWidget->setCellWidget(row, 3, lineEdit);
+        }
+        break;
+        case 2:
+        {
+            tableItems.dateTimeEdit = new QDateTimeEdit(ui->tableWidget);
+            ui->tableWidget->setCellWidget(row, i, tableItems.dateTimeEdit);
+        }
+        break;
+        case 3:
+        {
+            tableItems.lineEdit = new QLineEdit(ui->tableWidget);
+            ui->tableWidget->setCellWidget(row, i, tableItems.lineEdit);
+        }
+        break;
+        default:
+            break;
+        }
+    }
+    m_tableItemWidgetList.append(tableItems);
+    tableItems.comBox->currentIndexChanged(tableItems.comBox->currentIndex());
 }
 
 void MainWindow::on_checkTime()
@@ -175,15 +195,14 @@ void MainWindow::_updateDateTimeList()
 {
     m_dateTimeList.clear();
     QDate currentDate = QDateTime::currentDateTime().date();
-    for (auto it = m_tableDataMap.begin(); it != m_tableDataMap.end(); it++)
+    for (int i = 0; i < m_tableItemWidgetList.size(); i++)
     {
-        QList<QVariant> varList = it.value();
-        bool enable = varList[0].toBool();
+        bool enable = m_tableItemWidgetList[i].checkBox->isChecked();
         if (enable)
         {
-            FrequencyType type = static_cast<FrequencyType>(varList[1].toInt());
-            QDateTime targetDateTime = varList[2].toDateTime();
-            QString str = varList[3].toString();
+            FrequencyType type = static_cast<FrequencyType>(m_tableItemWidgetList[i].comBox->currentIndex());
+            QDateTime targetDateTime = m_tableItemWidgetList[i].dateTimeEdit->dateTime();
+            QString str = m_tableItemWidgetList[i].lineEdit->text();
             switch (type)
             {
             case FrequencyType::Once:
@@ -216,7 +235,7 @@ void MainWindow::_updateDateTimeList()
             default:
                 break;
             }
-            m_dateTimeList.append(QPair<int, QDateTime>(it.key(), targetDateTime));
+            m_dateTimeList.append(QPair<int, QDateTime>(i, targetDateTime));
         }
     }
     std::sort(m_dateTimeList.begin(), m_dateTimeList.end(), [](const QPair<int, QDateTime> &a, const QPair<int, QDateTime> &b)
@@ -227,40 +246,13 @@ void MainWindow::_updateDateTimeList()
 
 void MainWindow::on_save()
 {
-    m_tableDataMap.clear();
-    QWidget *widget = nullptr;
-    for (int i = 0; i < ui->tableWidget->rowCount(); i++)
-    {
-        QList<QVariant> varList;
-        widget = ui->tableWidget->cellWidget(i, 0);
-        varList.append(qobject_cast<QCheckBox *>(widget->layout()->widget())->isChecked());
-
-        widget = ui->tableWidget->cellWidget(i, 1);
-        varList.append(qobject_cast<QComboBox *>(widget)->currentIndex());
-
-        widget = ui->tableWidget->cellWidget(i, 2);
-        varList.append(qobject_cast<QDateTimeEdit *>(widget)->dateTime());
-
-        widget = ui->tableWidget->cellWidget(i, 3);
-        varList.append(qobject_cast<QLineEdit *>(widget)->text());
-
-        m_tableDataMap[i] = varList;
-    }
     _updateDateTimeList();
-    if (m_tableDataMap.size() > 0)
-    {
-        QMessageBox::information(this, "提示", "保存成功");
-    }
+    QMessageBox::information(this, "提示", "保存成功");
 }
 
 void MainWindow::_showInfoWidget(int index)
 {
-    QString infoText;
-    if (m_tableDataMap.contains(index))
-    {
-        auto items = m_tableDataMap[index];
-        infoText = items[items.size() - 1].toString();
-    }
+    QString infoText = m_tableItemWidgetList[index].lineEdit->text();
 }
 
 void MainWindow::on_delete()
