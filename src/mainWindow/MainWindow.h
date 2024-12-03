@@ -5,6 +5,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTimeEdit>
+#include <QDate>
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QCloseEvent>
@@ -40,6 +41,9 @@ protected:
 private:
     void _initTableWidget();
     void _initSystemTrayIcon();
+    void _updateDateTimeList();
+    void _showInfoWidget();
+    QString _getInfoText(int index);
 
     void on_addOneRow();
     void on_save();
@@ -65,5 +69,6 @@ private:
                                                    {FrequencyType::EveryMonth, "每月"},
                                                    {FrequencyType::EveryYear, "每年"}};
     QMap<int, QList<QVariant>> m_tableDataMap;
+    QList<QPair<int, QDateTime>> m_dateTimeList;
 };
 #endif // MAINWINDOW_H

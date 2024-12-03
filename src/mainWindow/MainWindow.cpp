@@ -148,7 +148,81 @@ void MainWindow::on_addOneRow()
 
 void MainWindow::on_checkTime()
 {
-    ui->statusbar->showMessage(QDateTime::currentDateTime().toString("yyyy/MM/dd dddd HH:mm:ss"));
+    auto currentDateTime = QDateTime::currentDateTime();
+    ui->statusbar->showMessage(currentDateTime.toString("yyyy/MM/dd dddd HH:mm:ss"));
+    if (currentDateTime.time() == QTime(0, 0, 0))
+    {
+        _updateDateTimeList();
+    }
+    for (auto pair : m_dateTimeList)
+    {
+        if (currentDateTime < pair.second)
+        {
+            continue;
+        }
+        else if (currentDateTime == pair.second)
+        {
+            _showInfoWidget(pair.first);
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+void MainWindow::_updateDateTimeList()
+{
+    m_dateTimeList.clear();
+    QDate currentDate = QDateTime::currentDateTime().date();
+    for (auto it = m_tableDataMap.begin(); it != m_tableDataMap.end(); it++)
+    {
+        QList<QVariant> varList = it.value();
+        bool enable = varList[0].toBool();
+        if (enable)
+        {
+            FrequencyType type = static_cast<FrequencyType>(varList[1].toInt());
+            QDateTime targetDateTime = varList[2].toDateTime();
+            QString str = varList[3].toString();
+            switch (type)
+            {
+            case FrequencyType::Once:
+                break;
+            case FrequencyType::EveryDay:
+                targetDateTime.setDate(currentDate);
+                break;
+            case FrequencyType::EveryWeek:
+            {
+                int daysToAdd = targetDateTime.date().dayOfWeek() - currentDate.dayOfWeek();
+                targetDateTime.setDate(currentDate.addDays(daysToAdd));
+            }
+            break;
+            case FrequencyType::EveryMonth:
+            {
+                int targetDay = targetDateTime.date().day();
+                if (targetDay >= targetDateTime.date().daysInMonth())
+                {
+                    targetDateTime.setDate(QDate(currentDate.year(), currentDate.month(), currentDate.daysInMonth()));
+                }
+                else
+                {
+                    targetDateTime.setDate(QDate(currentDate.year(), currentDate.month(), targetDay));
+                }
+            }
+            break;
+            case FrequencyType::EveryYear:
+                targetDateTime.setDate(QDate(currentDate.year(), targetDateTime.date().month(), targetDateTime.date().day()));
+                break;
+            default:
+                break;
+            }
+            m_dateTimeList.append(QPair<int, QDateTime>(it.key(), targetDateTime));
+        }
+    }
+    std::sort(m_dateTimeList.begin(), m_dateTimeList.end(), [](const QPair<int, QDateTime> &a, const QPair<int, QDateTime> &b)
+              {
+                  return a.second < b.second; // 按 QDateTime 升序排列
+              });
 }
 
 void MainWindow::on_save()
@@ -172,9 +246,20 @@ void MainWindow::on_save()
 
         m_tableDataMap[i] = varList;
     }
+    _updateDateTimeList();
     if (m_tableDataMap.size() > 0)
     {
         QMessageBox::information(this, "提示", "保存成功");
+    }
+}
+
+void MainWindow::_showInfoWidget(int index)
+{
+    QString infoText;
+    if (m_tableDataMap.contains(index))
+    {
+        auto items = m_tableDataMap[index];
+        infoText = items[items.size() - 1].toString();
     }
 }
 
