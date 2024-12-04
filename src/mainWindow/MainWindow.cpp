@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_timer->setInterval(1000);
     connect(m_timer, &QTimer::timeout, this, &MainWindow::on_checkTime);
     m_timer->start();
+
+    _loadDataJsonFile();
 }
 
 MainWindow::~MainWindow()
@@ -39,11 +41,7 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::_initTableWidget()
 {
-    ui->tableWidget->clear();
-    while (ui->tableWidget->rowCount() > 0)
-    {
-        ui->tableWidget->removeRow(0);
-    }
+    _clearTableWidgetAndData();
     ui->tableWidget->setColumnCount(m_tableHeaderLables.size());
     ui->tableWidget->horizontalHeader()->setVisible(true);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
@@ -51,6 +49,16 @@ void MainWindow::_initTableWidget()
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     ui->tableWidget->setHorizontalHeaderLabels(m_tableHeaderLables);
+}
+
+void MainWindow::_clearTableWidgetAndData()
+{
+    ui->tableWidget->clear();
+    while (ui->tableWidget->rowCount() > 0)
+    {
+        ui->tableWidget->removeRow(0);
+    }
+    m_tableItemWidgetList.clear();
 }
 
 void MainWindow::_initSystemTrayIcon()
@@ -88,9 +96,15 @@ void MainWindow::_initSystemTrayIcon()
 
 void MainWindow::on_addOneRow()
 {
+    QSharedPointer<oneTableRowItem> tableItemsPtr(new oneTableRowItem());
+    _tableWidgetAddOneRow(tableItemsPtr);
+}
+
+void MainWindow::_tableWidgetAddOneRow(QSharedPointer<oneTableRowItem> tableItemsPtr)
+{
+    m_tableItemWidgetList.append(tableItemsPtr);
     int row = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(row);
-    oneTableRowItem tableItems;
     for (int i = 0; i < ui->tableWidget->columnCount(); i++)
     {
         switch (i)
@@ -98,72 +112,32 @@ void MainWindow::on_addOneRow()
         case 0:
         {
             QWidget *centeredWidget = new QWidget(ui->tableWidget);
-            tableItems.checkBox = new QCheckBox(centeredWidget);
             QHBoxLayout *layout = new QHBoxLayout(centeredWidget);
-            layout->addWidget(tableItems.checkBox);
+            layout->addWidget(tableItemsPtr->checkBox);
             layout->setAlignment(Qt::AlignCenter);  // 居中
             layout->setContentsMargins(0, 0, 0, 0); // 去除边距
-            tableItems.checkBox->setChecked(true);
             ui->tableWidget->setCellWidget(row, i, centeredWidget);
         }
         break;
         case 1:
         {
-            tableItems.comBox = new QComboBox(ui->tableWidget);
-            tableItems.comBox->addItems(QStringList(m_frequencyTypeMap.values()));
-            ui->tableWidget->setCellWidget(row, i, tableItems.comBox);
-
-            connect(tableItems.comBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, row](int index)
-                    {
-                auto dateTimeEdit=this->m_tableItemWidgetList[row].dateTimeEdit;
-                FrequencyType _type = static_cast<FrequencyType>(index);
-                switch (_type)
-                {
-                case FrequencyType::Once:
-                    dateTimeEdit->setDisplayFormat("yyyy/MM/dd HH:mm:ss");
-                    break;
-                case FrequencyType::EveryDay:
-                    dateTimeEdit->setDisplayFormat("HH:mm:ss");
-                    break;
-                case FrequencyType::EveryWeek:
-                    dateTimeEdit->setDisplayFormat("dddd HH:mm:ss");
-                    break;
-                case FrequencyType::EveryMonth:
-                    dateTimeEdit->setDisplayFormat("/dd HH:mm:ss");
-                    break;
-                case FrequencyType::EveryYear:
-                    dateTimeEdit->setDisplayFormat("MM/dd HH:mm:ss");
-                    break;
-                default:
-                    break;
-                }
-                dateTimeEdit->setMinimumDateTime(QDateTime(QDate(1752, 9, 14), QTime(0, 0, 0)));
-                dateTimeEdit->setMaximumDateTime(QDateTime(QDate(9999, 12, 31), QTime(23, 59, 59)));
-                QDateTime currentDateTime = QDateTime::currentDateTime();
-                QTime currentTime = currentDateTime.time();
-                currentTime.setHMS(currentTime.hour(), currentTime.minute(), 0);
-                currentDateTime.setTime(currentTime);
-                dateTimeEdit->setDateTime(currentDateTime); });
+            ui->tableWidget->setCellWidget(row, i, tableItemsPtr->comBox);
         }
         break;
         case 2:
         {
-            tableItems.dateTimeEdit = new QDateTimeEdit(ui->tableWidget);
-            ui->tableWidget->setCellWidget(row, i, tableItems.dateTimeEdit);
+            ui->tableWidget->setCellWidget(row, i, tableItemsPtr->dateTimeEdit);
         }
         break;
         case 3:
         {
-            tableItems.lineEdit = new QLineEdit(ui->tableWidget);
-            ui->tableWidget->setCellWidget(row, i, tableItems.lineEdit);
+            ui->tableWidget->setCellWidget(row, i, tableItemsPtr->lineEdit);
         }
         break;
         default:
             break;
         }
     }
-    m_tableItemWidgetList.append(tableItems);
-    tableItems.comBox->currentIndexChanged(tableItems.comBox->currentIndex());
 }
 
 void MainWindow::on_checkTime()
@@ -197,12 +171,12 @@ void MainWindow::_updateDateTimeList()
     QDate currentDate = QDateTime::currentDateTime().date();
     for (int i = 0; i < m_tableItemWidgetList.size(); i++)
     {
-        bool enable = m_tableItemWidgetList[i].checkBox->isChecked();
+        bool enable = m_tableItemWidgetList[i]->checkBox->isChecked();
         if (enable)
         {
-            FrequencyType type = static_cast<FrequencyType>(m_tableItemWidgetList[i].comBox->currentIndex());
-            QDateTime targetDateTime = m_tableItemWidgetList[i].dateTimeEdit->dateTime();
-            QString str = m_tableItemWidgetList[i].lineEdit->text();
+            FrequencyType type = static_cast<FrequencyType>(m_tableItemWidgetList[i]->comBox->currentIndex());
+            QDateTime targetDateTime = m_tableItemWidgetList[i]->dateTimeEdit->dateTime();
+            QString str = m_tableItemWidgetList[i]->lineEdit->text();
             switch (type)
             {
             case FrequencyType::Once:
@@ -246,13 +220,63 @@ void MainWindow::_updateDateTimeList()
 
 void MainWindow::on_save()
 {
+    _saveDataJsonFile();
     _updateDateTimeList();
     QMessageBox::information(this, "提示", "保存成功");
 }
 
+void MainWindow::_saveDataJsonFile()
+{
+    QString currentPath = QApplication::applicationDirPath();
+    QJsonObject rootObject;
+    for (int i = 0; i < m_tableItemWidgetList.size(); i++)
+    {
+        QJsonObject object;
+        object["enable"] = m_tableItemWidgetList[i]->checkBox->isChecked();
+        object["type"] = m_tableItemWidgetList[i]->comBox->currentIndex();
+        object["time"] = m_tableItemWidgetList[i]->dateTimeEdit->dateTime().toString("yyyy/MM/dd HH:mm:ss");
+        object["content"] = m_tableItemWidgetList[i]->lineEdit->text();
+        rootObject[QString::number(i)] = object;
+    }
+
+    QFile file(m_saveDataFilePath);
+    if (file.open(QIODevice::WriteOnly))
+    {
+        QJsonDocument jsonDoc(rootObject);
+        file.write(jsonDoc.toJson());
+        file.close();
+    }
+}
+void MainWindow::_loadDataJsonFile()
+{
+    _clearTableWidgetAndData();
+    QFile file(m_saveDataFilePath);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray jsonData = file.readAll();
+        file.close();
+
+        QJsonParseError jsonError;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &jsonError);
+        QJsonObject jsonObject = jsonDoc.object();
+        for (int i = 0; i < jsonObject.keys().size(); i++)
+        {
+            auto key = jsonObject.keys()[i];
+            auto valueDict = jsonObject[key].toObject();
+            bool enable = valueDict["enable"].toBool();
+            int type = valueDict["type"].toInt();
+            QString timeStr = valueDict["time"].toString();
+            QString content = valueDict["content"].toString();
+            QSharedPointer<oneTableRowItem> tableItemsPtr(new oneTableRowItem(enable, type, timeStr, content));
+            _tableWidgetAddOneRow(tableItemsPtr);
+        }
+        _updateDateTimeList();
+    }
+}
+
 void MainWindow::_showInfoWidget(int index)
 {
-    QString infoText = m_tableItemWidgetList[index].lineEdit->text();
+    QString infoText = m_tableItemWidgetList[index]->lineEdit->text();
 }
 
 void MainWindow::on_delete()

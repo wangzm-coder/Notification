@@ -16,8 +16,15 @@
 #include <QDebug>
 #include <QAction>
 #include <QTimer>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QSharedPointer>
+#include <QJsonArray>
+#include <QFile>
 #include <QSystemTrayIcon>
 #include "ui_MainWindow.h"
+
+#include "src/component/oneRowTableItem.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -42,6 +49,10 @@ private:
     void _initTableWidget();
     void _initSystemTrayIcon();
     void _updateDateTimeList();
+    void _loadDataJsonFile();
+    void _saveDataJsonFile();
+    void _clearTableWidgetAndData();
+    void _tableWidgetAddOneRow(QSharedPointer<oneTableRowItem> tableItems);
     void _showInfoWidget(int index);
 
     void on_addOneRow();
@@ -54,30 +65,9 @@ private:
     QTimer *m_timer = nullptr;
     QSystemTrayIcon *m_systemTrayIcon = nullptr;
 
-    enum class FrequencyType
-    {
-        Once = 0,
-        EveryDay,
-        EveryWeek,
-        EveryMonth,
-        EveryYear
-    };
+    const QString m_saveDataFilePath = QApplication::applicationDirPath() + "/saveData.json";
 
-    const QMap<FrequencyType, QString> m_frequencyTypeMap = {{FrequencyType::Once, "单次"},
-                                                             {FrequencyType::EveryDay, "每天"},
-                                                             {FrequencyType::EveryWeek, "每周"},
-                                                             {FrequencyType::EveryMonth, "每月"},
-                                                             {FrequencyType::EveryYear, "每年"}};
-    struct oneTableRowItem
-    {
-        QCheckBox *checkBox = nullptr;
-        QComboBox *comBox = nullptr;
-        QDateTimeEdit *dateTimeEdit = nullptr;
-        QLineEdit *lineEdit = nullptr;
-    };
-    const QStringList m_tableHeaderLables = {QString(), "频率", "时间", "事件"};
-
-    QList<oneTableRowItem> m_tableItemWidgetList;
+    QList<QSharedPointer<oneTableRowItem>> m_tableItemWidgetList;
     QList<QPair<int, QDateTime>> m_dateTimeList;
 };
 
