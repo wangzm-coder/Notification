@@ -47,10 +47,17 @@ void MainWindow::_initTableWidget()
 
     ui->tableWidget->setColumnCount(m_tableHeaderLables.size());
     ui->tableWidget->horizontalHeader()->setVisible(true);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    for (int i = 0; i < ui->tableWidget->columnCount(); i++)
+    {
+        if (i == ui->tableWidget->columnCount() - 1)
+        {
+            ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
+        }
+        else
+        {
+            ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+        }
+    }
     ui->tableWidget->setHorizontalHeaderLabels(m_tableHeaderLables);
 }
 
