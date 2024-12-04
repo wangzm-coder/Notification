@@ -6,20 +6,21 @@ MainWindow::MainWindow(QWidget *parent)
       m_timer(new QTimer(this))
 {
     ui->setupUi(this);
-    _initSystemTrayIcon();
-    _initTableWidget();
     setWindowIcon(QIcon(":/icons/notification.png"));
     setWindowTitle("Notification");
+
+    _initSystemTrayIcon();
+    _initTableWidget();
 
     connect(ui->action_add, &QAction::triggered, this, &MainWindow::on_addOneRow);
     connect(ui->action_save, &QAction::triggered, this, &MainWindow::on_save);
     connect(ui->action_delete, &QAction::triggered, this, &MainWindow::on_delete);
 
+    _loadDataJsonFile();
+
     m_timer->setInterval(1000);
     connect(m_timer, &QTimer::timeout, this, &MainWindow::on_checkTime);
     m_timer->start();
-
-    _loadDataJsonFile();
 }
 
 MainWindow::~MainWindow()
@@ -41,7 +42,9 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::_initTableWidget()
 {
+    ui->tableWidget->clear();
     _clearTableWidgetAndData();
+
     ui->tableWidget->setColumnCount(m_tableHeaderLables.size());
     ui->tableWidget->horizontalHeader()->setVisible(true);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
@@ -53,7 +56,6 @@ void MainWindow::_initTableWidget()
 
 void MainWindow::_clearTableWidgetAndData()
 {
-    ui->tableWidget->clear();
     while (ui->tableWidget->rowCount() > 0)
     {
         ui->tableWidget->removeRow(0);

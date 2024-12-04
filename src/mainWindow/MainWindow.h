@@ -66,6 +66,7 @@ private:
     QSystemTrayIcon *m_systemTrayIcon = nullptr;
 
     const QString m_saveDataFilePath = QApplication::applicationDirPath() + "/saveData.json";
+    // const QStringList m_tableHeaderLables = {QString(), "频率", "时间", "事件"};
 
     QList<QSharedPointer<oneTableRowItem>> m_tableItemWidgetList;
     QList<QPair<int, QDateTime>> m_dateTimeList;

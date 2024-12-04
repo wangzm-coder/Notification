@@ -30,9 +30,6 @@ void oneTableRowItem::_init(bool enable, int typeIndex, QString timeStr, QString
 
     comBox->addItems(m_frequencyTypeMap.values());
     comBox->setCurrentIndex(typeIndex);
-
-    dateTimeEdit->setMinimumDateTime(QDateTime(QDate(1752, 9, 14), QTime(0, 0, 0)));
-    dateTimeEdit->setMaximumDateTime(QDateTime(QDate(9999, 12, 31), QTime(23, 59, 59)));
     if (timeStr.size() > 0)
     {
         dateTimeEdit->setDateTime(QDateTime::fromString(timeStr));
@@ -68,6 +65,9 @@ void oneTableRowItem::_init(bool enable, int typeIndex, QString timeStr, QString
                             break;
                         default:
                             break;
-                        } });
+                        }
+                        dateTimeEdit->setMinimumDateTime(QDateTime(QDate(1752, 9, 14), QTime(0, 0, 0)));
+                        dateTimeEdit->setMaximumDateTime(QDateTime(QDate(9999, 12, 31), QTime(23, 59, 59)));
+                        dateTimeEdit->setDateTime(dateTimeEdit->dateTime()); });
     comBox->currentIndexChanged(comBox->currentIndex());
 }

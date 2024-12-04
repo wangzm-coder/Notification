@@ -1,4 +1,5 @@
 #pragma once
+
 #include <QMap>
 #include <QCheckBox>
 #include <QComboBox>
