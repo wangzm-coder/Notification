@@ -1,9 +1,10 @@
-#include "MainWindow.h"
+#include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      m_timer(new QTimer(this))
+      m_timer(new QTimer(this)),
+      m_infoTextWidget(new InfoTextWidget(this))
 {
     ui->setupUi(this);
     setWindowIcon(QIcon(":/icons/notification.png"));
@@ -38,6 +39,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::showEvent(QShowEvent *event)
 {
     ui->toolBar->setVisible(true);
+    common::moveWidgetToCenter(this);
 }
 
 void MainWindow::_initTableWidget()
@@ -47,17 +49,6 @@ void MainWindow::_initTableWidget()
 
     ui->tableWidget->setColumnCount(m_tableHeaderLables.size());
     ui->tableWidget->horizontalHeader()->setVisible(true);
-    for (int i = 0; i < ui->tableWidget->columnCount(); i++)
-    {
-        if (i == ui->tableWidget->columnCount() - 1)
-        {
-            ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
-        }
-        else
-        {
-            ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
-        }
-    }
     ui->tableWidget->setHorizontalHeaderLabels(m_tableHeaderLables);
 }
 
@@ -75,7 +66,7 @@ void MainWindow::_initSystemTrayIcon()
     if (QSystemTrayIcon::isSystemTrayAvailable())
     {
         m_systemTrayIcon = new QSystemTrayIcon(this);
-        m_systemTrayIcon->setIcon(QIcon(":/icons/notification.png"));
+        m_systemTrayIcon->setIcon(QIcon(":/icons/info.png"));
         QMenu *trayMenu = new QMenu(this);
         QAction *showAction = new QAction("显示", m_systemTrayIcon);
         QAction *quitAction = new QAction("退出", m_systemTrayIcon);
@@ -105,13 +96,14 @@ void MainWindow::_initSystemTrayIcon()
 
 void MainWindow::on_addOneRow()
 {
-    QSharedPointer<oneTableRowItem> tableItemsPtr(new oneTableRowItem());
+    QSharedPointer<OneTableRowItem> tableItemsPtr(new OneTableRowItem());
     _tableWidgetAddOneRow(tableItemsPtr);
 }
 
-void MainWindow::_tableWidgetAddOneRow(QSharedPointer<oneTableRowItem> tableItemsPtr)
+void MainWindow::_tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItemsPtr)
 {
     m_tableItemWidgetList.append(tableItemsPtr);
+    connect(tableItemsPtr.data(), &OneTableRowItem::frequencyTypeChanged, this, &MainWindow::on_updateTableWidgetLayout);
     int row = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(row);
     for (int i = 0; i < ui->tableWidget->columnCount(); i++)
@@ -147,12 +139,14 @@ void MainWindow::_tableWidgetAddOneRow(QSharedPointer<oneTableRowItem> tableItem
             break;
         }
     }
+    on_updateTableWidgetLayout();
 }
 
 void MainWindow::on_checkTime()
 {
     auto currentDateTime = QDateTime::currentDateTime();
-    ui->statusbar->showMessage(currentDateTime.toString("yyyy/MM/dd dddd HH:mm:ss"));
+    currentDateTime.setTime(QTime(currentDateTime.time().hour(), currentDateTime.time().minute(), currentDateTime.time().second()));
+    ui->statusbar->showMessage(currentDateTime.toString(m_defaultDateTimeFormat));
     if (currentDateTime.time() == QTime(0, 0, 0))
     {
         _updateDateTimeList();
@@ -161,7 +155,7 @@ void MainWindow::on_checkTime()
     {
         if (currentDateTime < pair.second)
         {
-            continue;
+            break;
         }
         else if (currentDateTime == pair.second)
         {
@@ -169,7 +163,22 @@ void MainWindow::on_checkTime()
         }
         else
         {
-            break;
+            continue;
+        }
+    }
+}
+
+void MainWindow::on_updateTableWidgetLayout()
+{
+    for (int i = 0; i < ui->tableWidget->columnCount(); i++)
+    {
+        if (i == ui->tableWidget->columnCount() - 1)
+        {
+            ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
+        }
+        else
+        {
+            ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
         }
     }
 }
@@ -243,7 +252,7 @@ void MainWindow::_saveDataJsonFile()
         QJsonObject object;
         object["enable"] = m_tableItemWidgetList[i]->checkBox->isChecked();
         object["type"] = m_tableItemWidgetList[i]->comBox->currentIndex();
-        object["time"] = m_tableItemWidgetList[i]->dateTimeEdit->dateTime().toString("yyyy/MM/dd HH:mm:ss");
+        object["time"] = m_tableItemWidgetList[i]->dateTimeEdit->dateTime().toString(m_defaultDateTimeFormat);
         object["content"] = m_tableItemWidgetList[i]->lineEdit->text();
         rootObject[QString::number(i)] = object;
     }
@@ -276,7 +285,7 @@ void MainWindow::_loadDataJsonFile()
             int type = valueDict["type"].toInt();
             QString timeStr = valueDict["time"].toString();
             QString content = valueDict["content"].toString();
-            QSharedPointer<oneTableRowItem> tableItemsPtr(new oneTableRowItem(enable, type, timeStr, content));
+            QSharedPointer<OneTableRowItem> tableItemsPtr(new OneTableRowItem(enable, type, QDateTime::fromString(timeStr, m_defaultDateTimeFormat), content));
             _tableWidgetAddOneRow(tableItemsPtr);
         }
         _updateDateTimeList();
@@ -285,9 +294,28 @@ void MainWindow::_loadDataJsonFile()
 
 void MainWindow::_showInfoWidget(int index)
 {
-    QString infoText = m_tableItemWidgetList[index]->lineEdit->text();
+    m_infoTextWidget->addInfo("[通知] 事件" + QString::number(index) + ": " + m_tableItemWidgetList[index]->lineEdit->text());
+    m_systemTrayIcon->showMessage("Notification", m_tableItemWidgetList[index]->lineEdit->text(), QSystemTrayIcon::Information, 10800);
 }
 
 void MainWindow::on_delete()
 {
+    auto ranges = ui->tableWidget->selectedRanges(); // 获取所有选中的单元格
+    QSet<int> rowsToDelete;                          // 存储需要删除的行号（去重）
+    for (const QTableWidgetSelectionRange &range : ranges)
+    {
+        for (int row = range.topRow(); row <= range.bottomRow(); ++row)
+        {
+            rowsToDelete.insert(row);
+        }
+    }
+
+    QList<int> sortedRows = rowsToDelete.values();     // 转换为列表
+    std::sort(sortedRows.rbegin(), sortedRows.rend()); // 按降序排序
+
+    for (int row : sortedRows) // 删除行
+    {
+        ui->tableWidget->removeRow(row);
+        m_tableItemWidgetList.removeAt(row);
+    }
 }

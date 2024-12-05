@@ -22,9 +22,11 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QSystemTrayIcon>
-#include "ui_MainWindow.h"
+#include "ui_mainWindow.h"
 
-#include "src/component/oneRowTableItem.h"
+#include "src/components/oneRowTableItem.h"
+#include "src/widgets/infoTextWidget.h"
+#include "src/common/tools.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -52,22 +54,24 @@ private:
     void _loadDataJsonFile();
     void _saveDataJsonFile();
     void _clearTableWidgetAndData();
-    void _tableWidgetAddOneRow(QSharedPointer<oneTableRowItem> tableItems);
+    void _tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItems);
     void _showInfoWidget(int index);
 
     void on_addOneRow();
     void on_save();
     void on_delete();
     void on_checkTime();
+    void on_updateTableWidgetLayout();
 
 private:
     Ui::MainWindow *ui;
     QTimer *m_timer = nullptr;
     QSystemTrayIcon *m_systemTrayIcon = nullptr;
+    InfoTextWidget *m_infoTextWidget = nullptr;
 
     const QString m_saveDataFilePath = QApplication::applicationDirPath() + "/saveData.json";
 
-    QList<QSharedPointer<oneTableRowItem>> m_tableItemWidgetList;
+    QList<QSharedPointer<OneTableRowItem>> m_tableItemWidgetList;
     QList<QPair<int, QDateTime>> m_dateTimeList;
 };
 

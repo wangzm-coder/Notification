@@ -1,4 +1,4 @@
-#include "mainWindow/MainWindow.h"
+#include "mainWindow/mainWindow.h"
 
 #include <QApplication>
 #include <QSystemTrayIcon>

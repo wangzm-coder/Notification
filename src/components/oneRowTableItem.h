@@ -7,7 +7,9 @@
 #include <QDateTime>
 #include <QTime>
 #include <QLineEdit>
+#include <QTableWidget>
 #include <QObject>
+#include <QHeaderView>
 
 enum class FrequencyType
 {
@@ -25,8 +27,9 @@ const QMap<FrequencyType, QString> m_frequencyTypeMap = {{FrequencyType::Once, "
                                                          {FrequencyType::EveryYear, "每年"}};
 
 const QStringList m_tableHeaderLables = {QString(), "频率", "时间", "事件"};
+const QString m_defaultDateTimeFormat = "yyyy/MM/dd dddd HH:mm:ss";
 
-class oneTableRowItem : public QObject
+class OneTableRowItem : public QObject
 {
     Q_OBJECT
 public:
@@ -35,13 +38,17 @@ public:
     QDateTimeEdit *dateTimeEdit = nullptr;
     QLineEdit *lineEdit = nullptr;
 
-    oneTableRowItem();
-    oneTableRowItem(bool enable, int typeIndex, QString timeStr, QString content);
-    ~oneTableRowItem();
+    OneTableRowItem();
+    OneTableRowItem(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content);
+    ~OneTableRowItem();
 
-    oneTableRowItem(const oneTableRowItem &) = delete;
-    oneTableRowItem &operator=(const oneTableRowItem &) = delete;
+    OneTableRowItem(const OneTableRowItem &) = delete;
+    OneTableRowItem &operator=(const OneTableRowItem &) = delete;
+
+signals:
+    void frequencyTypeChanged();
 
 private:
-    void _init(bool enable = true, int typeIndex = 0, QString timeStr = QString(), QString content = QString());
+    void _init(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content);
+    void _updateContainerWidgetLayout();
 };
