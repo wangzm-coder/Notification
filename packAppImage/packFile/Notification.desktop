@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Notification
-Exec=Notification
+Exec=bin/Notification
 Icon=Notification
 Type=Application
 Terminal=true
