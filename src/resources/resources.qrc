@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/notification.png</file>
         <file>icons/add.png</file>
         <file>icons/delete.png</file>
         <file>icons/save.png</file>

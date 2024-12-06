@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
       m_infoTextWidget(new InfoTextWidget(this))
 {
     ui->setupUi(this);
-    setWindowIcon(QIcon(":/icons/notification.png"));
-    setWindowTitle("Notification");
+    setWindowIcon(QIcon(":/icons/info.png"));
+    setWindowTitle(QApplication::applicationName());
 
     _initSystemTrayIcon();
     _initTableWidget();
