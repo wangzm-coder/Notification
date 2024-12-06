@@ -73,4 +73,9 @@ Thumbs.db
 build
 .vscode
 CMakeLists.txt.user
+*.AppImage
+AppRun
+.DirIcon
+copyright
+packAppImage
 

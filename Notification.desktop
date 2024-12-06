@@ -5,3 +5,4 @@ Icon=Notification
 Type=Application
 Terminal=true
 Categories=Utility;
+X-AppImage-Version=437fd35
