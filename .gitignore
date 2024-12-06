@@ -76,6 +76,5 @@ CMakeLists.txt.user
 *.AppImage
 AppRun
 .DirIcon
-copyright
 packAppImage
 
