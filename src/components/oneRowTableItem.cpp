@@ -1,9 +1,6 @@
 #include "oneRowTableItem.h"
 
-OneTableRowItem::OneTableRowItem() : checkBox(new QCheckBox()),
-                                     comBox(new QComboBox()),
-                                     dateTimeEdit(new QDateTimeEdit()),
-                                     lineEdit(new QLineEdit()) {
+OneTableRowItem::OneTableRowItem() {
     QDateTime currentDateTime = QDateTime::currentDateTime();
     QTime currentTime = currentDateTime.time();
     currentTime.setHMS(currentTime.hour(), currentTime.minute(), 0);
@@ -15,10 +12,7 @@ OneTableRowItem::OneTableRowItem(
     bool enable,
     int typeIndex,
     const QDateTime &dateTime,
-    const QString &content) : checkBox(new QCheckBox()),
-                              comBox(new QComboBox()),
-                              dateTimeEdit(new QDateTimeEdit()),
-                              lineEdit(new QLineEdit()) {
+    const QString &content) {
     _init(enable, typeIndex, dateTime, content);
 }
 
@@ -26,14 +20,31 @@ OneTableRowItem::~OneTableRowItem() {}
 
 void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content) {
 
+    checkBox = new QCheckBox();
     checkBox->setChecked(enable);
+
+    dateTimeEdit = new QDateTimeEdit();
+    dateTimeEdit->setDateTime(dateTime);
+
+    lineEdit = new QLineEdit();
     lineEdit->setText(content);
     lineEdit->setPlaceholderText("事件/( 主动停止时间(s) 等待关闭时间(s) )");
+    lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     connect(lineEdit, &QLineEdit::editingFinished, this, &OneTableRowItem::editingFinished);
-    dateTimeEdit->setDateTime(dateTime);
+
+    toolButton = new QToolButton();
+    toolButton->setText("...");
+    toolButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    connect(toolButton, &QToolButton::clicked, [this]() {
+        QString fileName = QFileDialog::getOpenFileName(nullptr, "打开文件", QDir::homePath(), "所有文件 (*.*)");
+        if (!fileName.isEmpty() && QFile::exists(fileName)) {
+            lineEdit->setText(fileName);
+        }
+    });
+
+    comBox = new QComboBox();
     comBox->addItems(m_frequencyTypeMap.values());
     comBox->setCurrentIndex(typeIndex);
-
     connect(comBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         FrequencyType _type = static_cast<FrequencyType>(index);
         switch (_type)

@@ -4,12 +4,14 @@
 #include <QComboBox>
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QFileDialog>
 #include <QHeaderView>
 #include <QLineEdit>
 #include <QMap>
 #include <QObject>
 #include <QTableWidget>
 #include <QTime>
+#include <QToolButton>
 
 enum class FrequencyType {
     Once = 0,
@@ -35,6 +37,7 @@ public:
     QComboBox *comBox = nullptr;
     QDateTimeEdit *dateTimeEdit = nullptr;
     QLineEdit *lineEdit = nullptr;
+    QToolButton *toolButton = nullptr;
 
     OneTableRowItem();
     OneTableRowItem(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content);

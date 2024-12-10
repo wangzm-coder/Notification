@@ -118,7 +118,13 @@ void MainWindow::_tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItem
             ui->tableWidget->setCellWidget(row, i, tableItemsPtr->dateTimeEdit);
         } break;
         case 3: {
-            ui->tableWidget->setCellWidget(row, i, tableItemsPtr->lineEdit);
+            QWidget *centeredWidget = new QWidget(ui->tableWidget);
+            QHBoxLayout *layout = new QHBoxLayout(centeredWidget);
+            layout->addWidget(tableItemsPtr->lineEdit);
+            layout->addWidget(tableItemsPtr->toolButton);
+            layout->setContentsMargins(0, 0, 0, 0); // 去除边距
+            layout->setSpacing(0);
+            ui->tableWidget->setCellWidget(row, i, centeredWidget);
         } break;
         default:
             break;
