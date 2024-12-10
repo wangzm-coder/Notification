@@ -15,6 +15,9 @@ public:
     ScriptRunner(QString scriptFile, int stopAfterSeconds = 0, int waitStopSeconds = 30, QObject *parent = nullptr);
     ~ScriptRunner();
 
+signals:
+    void showInfo(const QString &);
+
 protected:
     void run();
 

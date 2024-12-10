@@ -7,7 +7,9 @@ ScriptRunner::ScriptRunner(QString pythonFile, int stopAfterSeconds, int waitSto
     start();
 }
 
-ScriptRunner::~ScriptRunner() {}
+ScriptRunner::~ScriptRunner() {
+    emit showInfo(QString("script file:%1 killed!").arg(m_scriptFile));
+}
 
 void ScriptRunner::run() {
     bool startSuccess = false;
@@ -15,52 +17,48 @@ void ScriptRunner::run() {
     m_process->setProcessChannelMode(QProcess::MergedChannels);
 
     connect(m_process.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, m_process](int exitCode, QProcess::ExitStatus exitStatus) {
-        qDebug() << "\n-------------------";
-        qDebug() << m_scriptFile;
-        qDebug() << "Process finished with exit code:" << exitCode;
-        qDebug() << "Exit status:" << exitStatus;
-        qDebug() << "-------------------\n";
+        emit showInfo(QString("script file:%1, exit code:%2, Exit status:%3").arg(m_scriptFile).arg(exitCode).arg(exitStatus));
     });
 
-    connect(m_process, &QProcess::readyReadStandardOutput, [m_process]() {
+    connect(m_process, &QProcess::readyReadStandardOutput, [this, m_process]() {
         QString output = QString::fromUtf8(m_process->readAllStandardOutput());
         QStringList lines = output.split("\n", QString::SkipEmptyParts);
         for (const QString &line : lines) {
-            qDebug() << line;
+            emit showInfo(line);
         }
     });
 
-    connect(m_process, &QProcess::readyReadStandardError, [m_process]() {
+    connect(m_process, &QProcess::readyReadStandardError, [this, m_process]() {
         QString output = QString::fromUtf8(m_process->readAllStandardError());
         QStringList lines = output.split("\n", QString::SkipEmptyParts);
         for (const QString &line : lines) {
-            qDebug() << line;
+            emit showInfo(line);
         }
     });
 
     if (QFile::exists(m_scriptFile)) {
         if (m_scriptFile.endsWith(".py", Qt::CaseInsensitive)) {
-            qDebug() << "start python script...";
+            emit showInfo("start python script...");
             m_process->start("python3", QStringList() << m_scriptFile);
         } else if (m_scriptFile.endsWith(".sh", Qt::CaseInsensitive)) {
-            qDebug() << "start bash script...";
+            emit showInfo("start bash script...");
             m_process->start("bash", QStringList() << m_scriptFile);
         } else if (m_scriptFile.endsWith(".desktop", Qt::CaseInsensitive)) {
-            qDebug() << "start desktop file...";
+            emit showInfo("start desktop file...");
             m_process->start("xdg-open", QStringList() << m_scriptFile);
         } else {
-            qDebug() << "Unsupported script type: " << m_scriptFile;
+            emit showInfo(QString("Unsupported script type: %1").arg(m_scriptFile));
         }
         if (m_process->waitForStarted()) {
             startSuccess = true;
         }
     } else {
-        qDebug() << "不存在脚本文件:" << m_scriptFile;
+        emit showInfo(QString("不存在脚本文件:%1").arg(m_scriptFile));
     }
     if (startSuccess) {
         if (m_stopAfterSeconds > 0) {
             QTimer::singleShot(m_stopAfterSeconds * 1000, [this]() {
-                qDebug() << "QProcesss: timeout ,kill process!";
+                emit showInfo("QProcesss: timeout ,kill process!");
                 quit();
             });
         }

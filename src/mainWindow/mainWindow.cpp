@@ -12,6 +12,11 @@ MainWindow::MainWindow(QWidget *parent)
     _initSystemTrayIcon();
     _initTableWidget();
 
+    // ui->splitter->setStretchFactor(0, 5); // widget1的伸缩因子为 3
+    // ui->splitter->setStretchFactor(1, 1); // widget2的伸缩因子为 1
+    ui->splitter->setSizes({1, 0});
+    ui->plainTextEdit->setReadOnly(true);
+
     connect(ui->action_add, &QAction::triggered, this, &MainWindow::on_addOneRow);
     connect(ui->action_save, &QAction::triggered, this, &MainWindow::on_save);
     connect(ui->action_delete, &QAction::triggered, this, &MainWindow::on_delete);
@@ -25,6 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
     m_timer->stop();
+    while (m_scriptRunnerList.size() > 0) {
+        m_scriptRunnerList[0]->quit();
+        m_scriptRunnerList[0]->wait();
+    }
     delete ui;
 }
 
@@ -238,17 +247,19 @@ void MainWindow::_loadDataJsonFile() {
 
 void MainWindow::_showInfoWidget(int index) {
     QString content = m_tableItemWidgetList[index]->lineEdit->text();
-    ScriptRunner *_ScriptRunner = nullptr;
+    QPointer<ScriptRunner> _ScriptRunner = nullptr;
     if (content.endsWith(".py", Qt::CaseInsensitive)) {
-        _ScriptRunner = new ScriptRunner(content, 60, 180, this);
+        _ScriptRunner = new ScriptRunner(content, 60, 30, this);
     } else if (content.endsWith(".sh", Qt::CaseInsensitive)) {
         _ScriptRunner = new ScriptRunner(content, 60, 30, this);
     } else if (content.endsWith(".desktop", Qt::CaseInsensitive)) {
         _ScriptRunner = new ScriptRunner(content, 60, 30, this);
     }
     if (_ScriptRunner) {
-        connect(_ScriptRunner, &ScriptRunner::finished, [this, _ScriptRunner]() {
-            qDebug() << "scriptRunner finished, kill scriptRunner";
+        m_scriptRunnerList.append(_ScriptRunner);
+        connect(_ScriptRunner.data(), &ScriptRunner::showInfo, this, &MainWindow::showTerminalInfo);
+        connect(_ScriptRunner.data(), &ScriptRunner::finished, [this, _ScriptRunner]() {
+            m_scriptRunnerList.removeOne(_ScriptRunner);
             _ScriptRunner->deleteLater();
         });
     } else {
@@ -276,4 +287,9 @@ void MainWindow::on_delete() {
             m_tableItemWidgetList.removeAt(row);
         }
     }
+}
+
+void MainWindow::showTerminalInfo(const QString &info) {
+    ui->plainTextEdit->appendPlainText(info);
+    qDebug() << info;
 }

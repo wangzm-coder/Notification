@@ -47,6 +47,8 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
+    void showTerminalInfo(const QString &info);
+
     void _initTableWidget();
     void _initSystemTrayIcon();
     void _updateDateTimeList();
@@ -72,6 +74,7 @@ private:
 
     QList<QSharedPointer<OneTableRowItem>> m_tableItemWidgetList;
     QList<QPair<int, QDateTime>> m_dateTimeList;
+    QList<QPointer<ScriptRunner>> m_scriptRunnerList;
 };
 
 #endif // MAINWINDOW_H
