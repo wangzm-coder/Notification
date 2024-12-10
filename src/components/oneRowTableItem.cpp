@@ -29,6 +29,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
     checkBox->setChecked(enable);
     lineEdit->setText(content);
     lineEdit->setPlaceholderText("事件/( 主动停止时间(s) 等待关闭时间(s) )");
+    connect(lineEdit, &QLineEdit::editingFinished, this, &OneTableRowItem::editingFinished);
     dateTimeEdit->setDateTime(dateTime);
     comBox->addItems(m_frequencyTypeMap.values());
     comBox->setCurrentIndex(typeIndex);
@@ -58,7 +59,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
         dateTimeEdit->setMinimumDateTime(QDateTime(QDate(1752, 9, 14), QTime(0, 0, 0)));
         dateTimeEdit->setMaximumDateTime(QDateTime(QDate(9999, 12, 31), QTime(23, 59, 59)));
         dateTimeEdit->setDateTime(dateTimeEdit->dateTime());
-        emit frequencyTypeChanged(); });
+        emit editingFinished(); });
 
     comBox->currentIndexChanged(comBox->currentIndex());
 }

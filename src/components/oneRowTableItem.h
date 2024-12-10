@@ -44,7 +44,7 @@ public:
     OneTableRowItem &operator=(const OneTableRowItem &) = delete;
 
 signals:
-    void frequencyTypeChanged();
+    void editingFinished();
 
 private:
     void _init(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content);

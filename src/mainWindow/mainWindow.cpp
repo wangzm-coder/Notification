@@ -98,7 +98,7 @@ void MainWindow::on_addOneRow() {
 
 void MainWindow::_tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItemsPtr) {
     m_tableItemWidgetList.append(tableItemsPtr);
-    connect(tableItemsPtr.data(), &OneTableRowItem::frequencyTypeChanged, this, &MainWindow::on_updateTableWidgetLayout);
+    connect(tableItemsPtr.data(), &OneTableRowItem::editingFinished, this, &MainWindow::on_updateTableWidgetLayout);
     int row = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(row);
     for (int i = 0; i < ui->tableWidget->columnCount(); i++) {
