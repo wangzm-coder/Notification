@@ -1,42 +1,41 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QDateTimeEdit>
-#include <QDate>
-#include <QWidget>
-#include <QHBoxLayout>
-#include <QCloseEvent>
-#include <QShowEvent>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QMenu>
-#include <QDebug>
+#include "ui_mainWindow.h"
 #include <QAction>
-#include <QTimer>
+#include <QCheckBox>
+#include <QCloseEvent>
+#include <QComboBox>
+#include <QDate>
+#include <QDateTimeEdit>
+#include <QDebug>
+#include <QFile>
+#include <QHBoxLayout>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMessageBox>
 #include <QSharedPointer>
-#include <QJsonArray>
-#include <QFile>
+#include <QShowEvent>
 #include <QSystemTrayIcon>
-#include "ui_mainWindow.h"
+#include <QTimer>
+#include <QWidget>
 
-#include "src/components/oneRowTableItem.h"
-#include "src/widgets/infoTextWidget.h"
 #include "src/common/tools.h"
+#include "src/components/oneRowTableItem.h"
+#include "src/components/scriptRunner.h"
+#include "src/widgets/infoTextWidget.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui
-{
+namespace Ui {
     class MainWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:

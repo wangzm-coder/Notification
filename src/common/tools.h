@@ -1,10 +1,9 @@
 
-#include <QWidget>
 #include <QApplication>
-#include <qscreen.h>
 #include <QTimer>
+#include <QWidget>
+#include <qscreen.h>
 
-namespace common
-{
+namespace common {
     void moveWidgetToCenter(QWidget *widget);
 }

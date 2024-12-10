@@ -3,8 +3,7 @@
 OneTableRowItem::OneTableRowItem() : checkBox(new QCheckBox()),
                                      comBox(new QComboBox()),
                                      dateTimeEdit(new QDateTimeEdit()),
-                                     lineEdit(new QLineEdit())
-{
+                                     lineEdit(new QLineEdit()) {
     QDateTime currentDateTime = QDateTime::currentDateTime();
     QTime currentTime = currentDateTime.time();
     currentTime.setHMS(currentTime.hour(), currentTime.minute(), 0);
@@ -19,15 +18,13 @@ OneTableRowItem::OneTableRowItem(
     const QString &content) : checkBox(new QCheckBox()),
                               comBox(new QComboBox()),
                               dateTimeEdit(new QDateTimeEdit()),
-                              lineEdit(new QLineEdit())
-{
+                              lineEdit(new QLineEdit()) {
     _init(enable, typeIndex, dateTime, content);
 }
 
 OneTableRowItem::~OneTableRowItem() {}
 
-void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content)
-{
+void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTime, const QString &content) {
 
     checkBox->setChecked(enable);
     lineEdit->setText(content);
@@ -35,8 +32,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
     comBox->addItems(m_frequencyTypeMap.values());
     comBox->setCurrentIndex(typeIndex);
 
-    connect(comBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
-            {
+    connect(comBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         FrequencyType _type = static_cast<FrequencyType>(index);
         switch (_type)
         {

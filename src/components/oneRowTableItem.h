@@ -1,18 +1,17 @@
 #pragma once
 
-#include <QMap>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDateTimeEdit>
 #include <QDateTime>
-#include <QTime>
-#include <QLineEdit>
-#include <QTableWidget>
-#include <QObject>
+#include <QDateTimeEdit>
 #include <QHeaderView>
+#include <QLineEdit>
+#include <QMap>
+#include <QObject>
+#include <QTableWidget>
+#include <QTime>
 
-enum class FrequencyType
-{
+enum class FrequencyType {
     Once = 0,
     EveryDay,
     EveryWeek,
@@ -29,8 +28,7 @@ const QMap<FrequencyType, QString> m_frequencyTypeMap = {{FrequencyType::Once, "
 const QStringList m_tableHeaderLables = {QString(), "频率", "时间", "事件"};
 const QString m_defaultDateTimeFormat = "yyyy/MM/dd dddd HH:mm:ss";
 
-class OneTableRowItem : public QObject
-{
+class OneTableRowItem : public QObject {
     Q_OBJECT
 public:
     QCheckBox *checkBox = nullptr;

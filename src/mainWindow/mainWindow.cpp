@@ -4,8 +4,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       m_timer(new QTimer(this)),
-      m_infoTextWidget(new InfoTextWidget(this))
-{
+      m_infoTextWidget(new InfoTextWidget(this)) {
     ui->setupUi(this);
     setWindowIcon(QIcon(":/icons/info.png"));
     setWindowTitle(QApplication::applicationName());
@@ -24,26 +23,22 @@ MainWindow::MainWindow(QWidget *parent)
     m_timer->start();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     m_timer->stop();
     delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
-{
+void MainWindow::closeEvent(QCloseEvent *event) {
     hide();
     event->ignore();
 }
 
-void MainWindow::showEvent(QShowEvent *event)
-{
+void MainWindow::showEvent(QShowEvent *event) {
     ui->toolBar->setVisible(true);
     common::moveWidgetToCenter(this);
 }
 
-void MainWindow::_initTableWidget()
-{
+void MainWindow::_initTableWidget() {
     ui->tableWidget->clear();
     _clearTableWidgetAndData();
 
@@ -52,19 +47,15 @@ void MainWindow::_initTableWidget()
     ui->tableWidget->setHorizontalHeaderLabels(m_tableHeaderLables);
 }
 
-void MainWindow::_clearTableWidgetAndData()
-{
-    while (ui->tableWidget->rowCount() > 0)
-    {
+void MainWindow::_clearTableWidgetAndData() {
+    while (ui->tableWidget->rowCount() > 0) {
         ui->tableWidget->removeRow(0);
     }
     m_tableItemWidgetList.clear();
 }
 
-void MainWindow::_initSystemTrayIcon()
-{
-    if (QSystemTrayIcon::isSystemTrayAvailable())
-    {
+void MainWindow::_initSystemTrayIcon() {
+    if (QSystemTrayIcon::isSystemTrayAvailable()) {
         m_systemTrayIcon = new QSystemTrayIcon(this);
         m_systemTrayIcon->setIcon(QIcon(":/icons/info.png"));
         QMenu *trayMenu = new QMenu(this);
@@ -75,8 +66,7 @@ void MainWindow::_initSystemTrayIcon()
         m_systemTrayIcon->setContextMenu(trayMenu);
         connect(showAction, &QAction::triggered, this, &MainWindow::showNormal);
         connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
-        connect(m_systemTrayIcon, &QSystemTrayIcon::activated, [this](QSystemTrayIcon::ActivationReason reason)
-                {
+        connect(m_systemTrayIcon, &QSystemTrayIcon::activated, [this](QSystemTrayIcon::ActivationReason reason) {
         if (reason == QSystemTrayIcon::Trigger) {
             if (isHidden()) {
                 showNormal();
@@ -86,55 +76,41 @@ void MainWindow::_initSystemTrayIcon()
             }
         } });
         m_systemTrayIcon->show();
-    }
-    else
-    {
+    } else {
         QMessageBox::critical(this, "报错", "当前系统不支持系统托盘，创建系统托盘失败");
         qApp->quit();
     }
 }
 
-void MainWindow::on_addOneRow()
-{
+void MainWindow::on_addOneRow() {
     QSharedPointer<OneTableRowItem> tableItemsPtr(new OneTableRowItem());
     _tableWidgetAddOneRow(tableItemsPtr);
 }
 
-void MainWindow::_tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItemsPtr)
-{
+void MainWindow::_tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItemsPtr) {
     m_tableItemWidgetList.append(tableItemsPtr);
     connect(tableItemsPtr.data(), &OneTableRowItem::frequencyTypeChanged, this, &MainWindow::on_updateTableWidgetLayout);
     int row = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(row);
-    for (int i = 0; i < ui->tableWidget->columnCount(); i++)
-    {
-        switch (i)
-        {
-        case 0:
-        {
+    for (int i = 0; i < ui->tableWidget->columnCount(); i++) {
+        switch (i) {
+        case 0: {
             QWidget *centeredWidget = new QWidget(ui->tableWidget);
             QHBoxLayout *layout = new QHBoxLayout(centeredWidget);
             layout->addWidget(tableItemsPtr->checkBox);
             layout->setAlignment(Qt::AlignCenter);  // 居中
             layout->setContentsMargins(0, 0, 0, 0); // 去除边距
             ui->tableWidget->setCellWidget(row, i, centeredWidget);
-        }
-        break;
-        case 1:
-        {
+        } break;
+        case 1: {
             ui->tableWidget->setCellWidget(row, i, tableItemsPtr->comBox);
-        }
-        break;
-        case 2:
-        {
+        } break;
+        case 2: {
             ui->tableWidget->setCellWidget(row, i, tableItemsPtr->dateTimeEdit);
-        }
-        break;
-        case 3:
-        {
+        } break;
+        case 3: {
             ui->tableWidget->setCellWidget(row, i, tableItemsPtr->lineEdit);
-        }
-        break;
+        } break;
         default:
             break;
         }
@@ -142,85 +118,61 @@ void MainWindow::_tableWidgetAddOneRow(QSharedPointer<OneTableRowItem> tableItem
     on_updateTableWidgetLayout();
 }
 
-void MainWindow::on_checkTime()
-{
+void MainWindow::on_checkTime() {
     auto currentDateTime = QDateTime::currentDateTime();
     currentDateTime.setTime(QTime(currentDateTime.time().hour(), currentDateTime.time().minute(), currentDateTime.time().second()));
     ui->statusbar->showMessage(currentDateTime.toString(m_defaultDateTimeFormat));
-    if (currentDateTime.time() == QTime(0, 0, 0))
-    {
+    if (currentDateTime.time() == QTime(0, 0, 0)) {
         _updateDateTimeList();
     }
-    for (auto pair : m_dateTimeList)
-    {
-        if (currentDateTime < pair.second)
-        {
+    for (auto pair : m_dateTimeList) {
+        if (currentDateTime < pair.second) {
             break;
-        }
-        else if (currentDateTime == pair.second)
-        {
+        } else if (currentDateTime == pair.second) {
             _showInfoWidget(pair.first);
-        }
-        else
-        {
+        } else {
             continue;
         }
     }
 }
 
-void MainWindow::on_updateTableWidgetLayout()
-{
-    for (int i = 0; i < ui->tableWidget->columnCount(); i++)
-    {
-        if (i == ui->tableWidget->columnCount() - 1)
-        {
+void MainWindow::on_updateTableWidgetLayout() {
+    for (int i = 0; i < ui->tableWidget->columnCount(); i++) {
+        if (i == ui->tableWidget->columnCount() - 1) {
             ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
-        }
-        else
-        {
+        } else {
             ui->tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
         }
     }
 }
 
-void MainWindow::_updateDateTimeList()
-{
+void MainWindow::_updateDateTimeList() {
     m_dateTimeList.clear();
     QDate currentDate = QDateTime::currentDateTime().date();
-    for (int i = 0; i < m_tableItemWidgetList.size(); i++)
-    {
+    for (int i = 0; i < m_tableItemWidgetList.size(); i++) {
         bool enable = m_tableItemWidgetList[i]->checkBox->isChecked();
-        if (enable)
-        {
+        if (enable) {
             FrequencyType type = static_cast<FrequencyType>(m_tableItemWidgetList[i]->comBox->currentIndex());
             QDateTime targetDateTime = m_tableItemWidgetList[i]->dateTimeEdit->dateTime();
             QString str = m_tableItemWidgetList[i]->lineEdit->text();
-            switch (type)
-            {
+            switch (type) {
             case FrequencyType::Once:
                 break;
             case FrequencyType::EveryDay:
                 targetDateTime.setDate(currentDate);
                 break;
-            case FrequencyType::EveryWeek:
-            {
+            case FrequencyType::EveryWeek: {
                 int daysToAdd = targetDateTime.date().dayOfWeek() - currentDate.dayOfWeek();
                 targetDateTime.setDate(currentDate.addDays(daysToAdd));
-            }
-            break;
-            case FrequencyType::EveryMonth:
-            {
+            } break;
+            case FrequencyType::EveryMonth: {
                 int targetDay = targetDateTime.date().day();
-                if (targetDay >= targetDateTime.date().daysInMonth())
-                {
+                if (targetDay >= targetDateTime.date().daysInMonth()) {
                     targetDateTime.setDate(QDate(currentDate.year(), currentDate.month(), currentDate.daysInMonth()));
-                }
-                else
-                {
+                } else {
                     targetDateTime.setDate(QDate(currentDate.year(), currentDate.month(), targetDay));
                 }
-            }
-            break;
+            } break;
             case FrequencyType::EveryYear:
                 targetDateTime.setDate(QDate(currentDate.year(), targetDateTime.date().month(), targetDateTime.date().day()));
                 break;
@@ -230,25 +182,21 @@ void MainWindow::_updateDateTimeList()
             m_dateTimeList.append(QPair<int, QDateTime>(i, targetDateTime));
         }
     }
-    std::sort(m_dateTimeList.begin(), m_dateTimeList.end(), [](const QPair<int, QDateTime> &a, const QPair<int, QDateTime> &b)
-              {
-                  return a.second < b.second; // 按 QDateTime 升序排列
-              });
+    std::sort(m_dateTimeList.begin(), m_dateTimeList.end(), [](const QPair<int, QDateTime> &a, const QPair<int, QDateTime> &b) {
+        return a.second < b.second; // 按 QDateTime 升序排列
+    });
 }
 
-void MainWindow::on_save()
-{
+void MainWindow::on_save() {
     _saveDataJsonFile();
     _updateDateTimeList();
     QMessageBox::information(this, "提示", "保存成功");
 }
 
-void MainWindow::_saveDataJsonFile()
-{
+void MainWindow::_saveDataJsonFile() {
     QString currentPath = QApplication::applicationDirPath();
     QJsonObject rootObject;
-    for (int i = 0; i < m_tableItemWidgetList.size(); i++)
-    {
+    for (int i = 0; i < m_tableItemWidgetList.size(); i++) {
         QJsonObject object;
         object["enable"] = m_tableItemWidgetList[i]->checkBox->isChecked();
         object["type"] = m_tableItemWidgetList[i]->comBox->currentIndex();
@@ -258,27 +206,23 @@ void MainWindow::_saveDataJsonFile()
     }
 
     QFile file(m_saveDataFilePath);
-    if (file.open(QIODevice::WriteOnly))
-    {
+    if (file.open(QIODevice::WriteOnly)) {
         QJsonDocument jsonDoc(rootObject);
         file.write(jsonDoc.toJson());
         file.close();
     }
 }
-void MainWindow::_loadDataJsonFile()
-{
+void MainWindow::_loadDataJsonFile() {
     _clearTableWidgetAndData();
     QFile file(m_saveDataFilePath);
-    if (file.open(QIODevice::ReadOnly))
-    {
+    if (file.open(QIODevice::ReadOnly)) {
         QByteArray jsonData = file.readAll();
         file.close();
 
         QJsonParseError jsonError;
         QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &jsonError);
         QJsonObject jsonObject = jsonDoc.object();
-        for (int i = 0; i < jsonObject.keys().size(); i++)
-        {
+        for (int i = 0; i < jsonObject.keys().size(); i++) {
             auto key = jsonObject.keys()[i];
             auto valueDict = jsonObject[key].toObject();
             bool enable = valueDict["enable"].toBool();
@@ -292,30 +236,44 @@ void MainWindow::_loadDataJsonFile()
     }
 }
 
-void MainWindow::_showInfoWidget(int index)
-{
-    m_infoTextWidget->addInfo("[通知] 事件" + QString::number(index) + ": " + m_tableItemWidgetList[index]->lineEdit->text());
-    m_systemTrayIcon->showMessage("Notification", m_tableItemWidgetList[index]->lineEdit->text(), QSystemTrayIcon::Information, 10800);
+void MainWindow::_showInfoWidget(int index) {
+    QString content = m_tableItemWidgetList[index]->lineEdit->text();
+    ScriptRunner *_ScriptRunner = nullptr;
+    if (content.endsWith(".py", Qt::CaseInsensitive)) {
+        _ScriptRunner = new ScriptRunner(content, 60, 180, this);
+    } else if (content.endsWith(".sh", Qt::CaseInsensitive)) {
+        _ScriptRunner = new ScriptRunner(content, 60, 30, this);
+    } else if (content.endsWith(".desktop", Qt::CaseInsensitive)) {
+        _ScriptRunner = new ScriptRunner(content, 60, 30, this);
+    }
+    if (_ScriptRunner) {
+        connect(_ScriptRunner, &ScriptRunner::finished, [this, _ScriptRunner]() {
+            qDebug() << "scriptRunner finished, kill scriptRunner";
+            _ScriptRunner->deleteLater();
+        });
+    } else {
+        m_infoTextWidget->addInfo("[通知] 事件" + QString::number(index) + ": " + content);
+        m_systemTrayIcon->showMessage("Notification", m_tableItemWidgetList[index]->lineEdit->text(), QSystemTrayIcon::Information, 10800);
+    }
 }
 
-void MainWindow::on_delete()
-{
-    auto ranges = ui->tableWidget->selectedRanges(); // 获取所有选中的单元格
-    QSet<int> rowsToDelete;                          // 存储需要删除的行号（去重）
-    for (const QTableWidgetSelectionRange &range : ranges)
-    {
-        for (int row = range.topRow(); row <= range.bottomRow(); ++row)
-        {
-            rowsToDelete.insert(row);
+void MainWindow::on_delete() {
+    auto res = QMessageBox::question(this, "删除", "是否确定删除?", QMessageBox::Yes, QMessageBox::No);
+    if (res == QMessageBox::Yes) {
+        auto ranges = ui->tableWidget->selectedRanges(); // 获取所有选中的单元格
+        QSet<int> rowsToDelete;                          // 存储需要删除的行号（去重）
+        for (const QTableWidgetSelectionRange &range : ranges) {
+            for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
+                rowsToDelete.insert(row);
+            }
         }
-    }
 
-    QList<int> sortedRows = rowsToDelete.values();     // 转换为列表
-    std::sort(sortedRows.rbegin(), sortedRows.rend()); // 按降序排序
+        QList<int> sortedRows = rowsToDelete.values();     // 转换为列表
+        std::sort(sortedRows.rbegin(), sortedRows.rend()); // 按降序排序
 
-    for (int row : sortedRows) // 删除行
-    {
-        ui->tableWidget->removeRow(row);
-        m_tableItemWidgetList.removeAt(row);
+        for (int row : sortedRows) {
+            ui->tableWidget->removeRow(row);
+            m_tableItemWidgetList.removeAt(row);
+        }
     }
 }
