@@ -28,6 +28,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
 
     checkBox->setChecked(enable);
     lineEdit->setText(content);
+    lineEdit->setPlaceholderText("事件/( 主动停止时间(s) 等待关闭时间(s) )");
     dateTimeEdit->setDateTime(dateTime);
     comBox->addItems(m_frequencyTypeMap.values());
     comBox->setCurrentIndex(typeIndex);

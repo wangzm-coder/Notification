@@ -249,12 +249,16 @@ void MainWindow::_showInfoWidget(int index) {
     QString content = m_tableItemWidgetList[index]->lineEdit->text();
     auto contentList = content.split(" ", Qt::SkipEmptyParts);
     QPointer<ScriptRunner> _ScriptRunner = nullptr;
-    if (contentList.size() == 3) {
-        if (contentList[0].endsWith(".py") ||
-            contentList[0].endsWith(".sh") ||
-            contentList[0].endsWith(".desktop")) {
-            _ScriptRunner = new ScriptRunner(contentList[0], contentList[1].toInt(), contentList[2].toInt(), this);
+    if (contentList[0].endsWith(".py") ||
+        contentList[0].endsWith(".sh") ||
+        contentList[0].endsWith(".desktop")) {
+        int _stopAfterSeconds = 0;
+        int _waitStopSeconds = 30;
+        if (contentList.size() == 3) {
+            _stopAfterSeconds = contentList[1].toInt();
+            _waitStopSeconds = contentList[2].toInt();
         }
+        _ScriptRunner = new ScriptRunner(contentList[0], _stopAfterSeconds, _waitStopSeconds, this);
     }
 
     if (_ScriptRunner) {
