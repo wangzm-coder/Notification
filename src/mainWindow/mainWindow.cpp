@@ -247,14 +247,16 @@ void MainWindow::_loadDataJsonFile() {
 
 void MainWindow::_showInfoWidget(int index) {
     QString content = m_tableItemWidgetList[index]->lineEdit->text();
+    auto contentList = content.split(" ", Qt::SkipEmptyParts);
     QPointer<ScriptRunner> _ScriptRunner = nullptr;
-    if (content.endsWith(".py", Qt::CaseInsensitive)) {
-        _ScriptRunner = new ScriptRunner(content, 60, 30, this);
-    } else if (content.endsWith(".sh", Qt::CaseInsensitive)) {
-        _ScriptRunner = new ScriptRunner(content, 60, 30, this);
-    } else if (content.endsWith(".desktop", Qt::CaseInsensitive)) {
-        _ScriptRunner = new ScriptRunner(content, 60, 30, this);
+    if (contentList.size() == 3) {
+        if (contentList[0].endsWith(".py") ||
+            contentList[0].endsWith(".sh") ||
+            contentList[0].endsWith(".desktop")) {
+            _ScriptRunner = new ScriptRunner(contentList[0], contentList[1].toInt(), contentList[2].toInt(), this);
+        }
     }
+
     if (_ScriptRunner) {
         m_scriptRunnerList.append(_ScriptRunner);
         connect(_ScriptRunner.data(), &ScriptRunner::showInfo, this, &MainWindow::showTerminalInfo);
