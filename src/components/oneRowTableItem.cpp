@@ -36,7 +36,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
     toolButton->setText("...");
     toolButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     connect(toolButton, &QToolButton::clicked, [this]() {
-        QString fileName = QFileDialog::getOpenFileName(nullptr, "打开文件", QDir::homePath(), "所有文件 (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(nullptr, "打开文件", QDir::homePath(), "脚本文件 (*.sh *.py)");
         if (!fileName.isEmpty() && QFile::exists(fileName)) {
             lineEdit->setText(fileName);
         }

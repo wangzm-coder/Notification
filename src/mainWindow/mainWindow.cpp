@@ -256,8 +256,7 @@ void MainWindow::_showInfoWidget(int index) {
     auto contentList = content.split(" ", Qt::SkipEmptyParts);
     QPointer<ScriptRunner> _ScriptRunner = nullptr;
     if (contentList[0].endsWith(".py") ||
-        contentList[0].endsWith(".sh") ||
-        contentList[0].endsWith(".desktop")) {
+        contentList[0].endsWith(".sh")) {
         int _stopAfterSeconds = 0;
         int _waitStopSeconds = 30;
         if (contentList.size() == 3) {

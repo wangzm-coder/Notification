@@ -43,9 +43,6 @@ void ScriptRunner::run() {
         } else if (m_scriptFile.endsWith(".sh", Qt::CaseInsensitive)) {
             emit showInfo("start bash script...");
             m_process->start("bash", QStringList() << m_scriptFile);
-        } else if (m_scriptFile.endsWith(".desktop", Qt::CaseInsensitive)) {
-            emit showInfo("start desktop file...");
-            m_process->start("xdg-open", QStringList() << m_scriptFile);
         } else {
             emit showInfo(QString("Unsupported script type: %1").arg(m_scriptFile));
         }
