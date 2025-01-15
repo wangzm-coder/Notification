@@ -38,7 +38,7 @@
       <widget class="QTableWidget" name="tableWidget"/>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>终端信息</string>
+        <string>脚本运行打印信息</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">

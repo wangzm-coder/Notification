@@ -28,7 +28,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
 
     lineEdit = new QLineEdit();
     lineEdit->setText(content);
-    lineEdit->setPlaceholderText("事件/( 主动停止时间(s) 等待关闭时间(s) )");
+    lineEdit->setPlaceholderText("事件/脚本 (主动停止时间(s) 等待关闭时间(s) )");
     lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     connect(lineEdit, &QLineEdit::editingFinished, this, &OneTableRowItem::editingFinished);
 
@@ -36,7 +36,7 @@ void OneTableRowItem::_init(bool enable, int typeIndex, const QDateTime &dateTim
     toolButton->setText("...");
     toolButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     connect(toolButton, &QToolButton::clicked, [this]() {
-        QString fileName = QFileDialog::getOpenFileName(nullptr, "打开文件", QDir::homePath(), "脚本文件 (*.sh *.py)");
+        QString fileName = QFileDialog::getOpenFileName(nullptr, "选择脚本文件", QDir::homePath(), "脚本文件 (*.sh *.py)");
         if (!fileName.isEmpty() && QFile::exists(fileName)) {
             lineEdit->setText(fileName);
         }

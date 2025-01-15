@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     _initSystemTrayIcon();
     _initTableWidget();
 
-    // ui->splitter->setStretchFactor(0, 5); // widget1的伸缩因子为 3
-    // ui->splitter->setStretchFactor(1, 1); // widget2的伸缩因子为 1
     ui->splitter->setSizes({1, 0});
     ui->plainTextEdit->setReadOnly(true);
 
@@ -274,7 +272,7 @@ void MainWindow::_showInfoWidget(int index) {
             _ScriptRunner->deleteLater();
         });
     } else {
-        m_infoTextWidget->addInfo("[通知] 事件" + QString::number(index) + ": " + content);
+        m_infoTextWidget->addInfo("[通知] " + QDateTime::currentDateTime().toString("yyyy/MM/dd-HH:mm:ss") + ": " + content);
         m_systemTrayIcon->showMessage("Notification", m_tableItemWidgetList[index]->lineEdit->text(), QSystemTrayIcon::Information, 10800);
     }
 }
@@ -301,6 +299,8 @@ void MainWindow::on_delete() {
 }
 
 void MainWindow::showTerminalInfo(const QString &info) {
+    if (ui->splitter->sizes()[1] == 0) {
+        ui->splitter->setSizes({{1, 1}});
+    }
     ui->plainTextEdit->appendPlainText(info);
-    qDebug() << info;
 }
