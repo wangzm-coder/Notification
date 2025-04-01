@@ -24,6 +24,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_timer->setInterval(1000);
     connect(m_timer, &QTimer::timeout, this, &MainWindow::on_checkTime);
     m_timer->start();
+
+    if (m_tableItemWidgetList.size() > 0) {
+        this->hide();
+    } else {
+        this->show();
+    }
 }
 
 MainWindow::~MainWindow() {
