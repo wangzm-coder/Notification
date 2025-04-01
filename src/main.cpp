@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
                     qDebug() << "Failed to connect to shared memory:" << sharedMemory.errorString();
                 }
 
-                QStringList pids = pidOutput.split("\n", QString::SkipEmptyParts);
+                QStringList pids = pidOutput.split("\n", Qt::SkipEmptyParts);
                 for (const QString &pid : pids) {
                     if (pid != QString::number(currentId)) {
                         QString killCommand = QString("kill -9 %1").arg(pid);
@@ -45,7 +45,8 @@ int main(int argc, char *argv[]) {
     qApp->setQuitOnLastWindowClosed(false);
 
     MainWindow w;
-    w.show();
+    w.hide();
+    // w.show();
 
     return a.exec();
 }

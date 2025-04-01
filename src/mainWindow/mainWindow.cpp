@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
       m_timer(new QTimer(this)),
       m_infoTextWidget(new InfoTextWidget(this)) {
     ui->setupUi(this);
-    setWindowIcon(QIcon(":/icons/info.png"));
+    setWindowIcon(QIcon(":/icons/info-white.png"));
     setWindowTitle(QApplication::applicationName());
 
     _initSystemTrayIcon();
@@ -64,7 +64,7 @@ void MainWindow::_clearTableWidgetAndData() {
 void MainWindow::_initSystemTrayIcon() {
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         m_systemTrayIcon = new QSystemTrayIcon(this);
-        m_systemTrayIcon->setIcon(QIcon(":/icons/info.png"));
+        m_systemTrayIcon->setIcon(QIcon(":/icons/info-white.png"));
         QMenu *trayMenu = new QMenu(this);
         QAction *showAction = new QAction("显示", m_systemTrayIcon);
         QAction *quitAction = new QAction("退出", m_systemTrayIcon);

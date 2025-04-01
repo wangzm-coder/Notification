@@ -22,7 +22,7 @@ void ScriptRunner::run() {
 
     connect(m_process, &QProcess::readyReadStandardOutput, [this, m_process]() {
         QString output = QString::fromUtf8(m_process->readAllStandardOutput());
-        QStringList lines = output.split("\n", QString::SkipEmptyParts);
+        QStringList lines = output.split("\n", Qt::SkipEmptyParts);
         for (const QString &line : lines) {
             emit showInfo(line);
         }
@@ -30,7 +30,7 @@ void ScriptRunner::run() {
 
     connect(m_process, &QProcess::readyReadStandardError, [this, m_process]() {
         QString output = QString::fromUtf8(m_process->readAllStandardError());
-        QStringList lines = output.split("\n", QString::SkipEmptyParts);
+        QStringList lines = output.split("\n", Qt::SkipEmptyParts);
         for (const QString &line : lines) {
             emit showInfo(line);
         }

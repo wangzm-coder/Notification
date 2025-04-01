@@ -3,6 +3,7 @@
         <file>icons/add.png</file>
         <file>icons/delete.png</file>
         <file>icons/save.png</file>
-        <file>icons/info.png</file>
+        <file>icons/info-white.png</file>
+        <file>icons/info-black.png</file>
     </qresource>
 </RCC>
